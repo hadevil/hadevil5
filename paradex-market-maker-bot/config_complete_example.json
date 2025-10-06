@@ -1,4 +1,11 @@
 {
+    "account": {
+        "address": "0x1234567890abcdef1234567890abcdef12345678",
+        "private_key": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+        "api_key": "your_api_key_here",
+        "api_secret": "your_api_secret_here",
+        "proxy": null
+    },
     "trading": {
         "order_value_usd": {
             "min": 8,

@@ -10,6 +10,9 @@
 - ✅ **Gerenciamento de risco avançado** - Controle de LTV, stop loss, take profit
 - ✅ **Compatível com Windows/PowerShell** - Scripts otimizados para Windows
 - ✅ **Farming de airdrop** - Estratégias para maximizar volume de trading
+- ✅ **Sistema avançado de métricas** - Dashboard completo de performance
+- ✅ **Configuração robusta** - Múltiplas validações e tratamento de erros
+- ✅ **Funcionalidades avançadas** - Backup, diagnóstico, testes automatizados
 
 ## 📋 Requisitos
 
@@ -20,18 +23,36 @@
 
 ## 🛠️ Instalação
 
-### 1. Clonar e entrar no diretório
-```bash
-git clone <url-do-repositorio>
+### 1. Preparar ambiente (Windows PowerShell)
+```powershell
+# Criar diretório do projeto
+mkdir C:\paradex-bot
+cd C:\paradex-bot
+
+# Baixar arquivos (escolha uma opção):
+
+# OPÇÃO 1: Download direto
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/seu-repo/paradex-market-maker-bot/main/main.py" -OutFile "main.py"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/seu-repo/paradex-market-maker-bot/main/requirements.txt" -OutFile "requirements.txt"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/seu-repo/paradex-market-maker-bot/main/config_windows.json" -OutFile "config_windows.json"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/seu-repo/paradex-market-maker-bot/main/run_windows.ps1" -OutFile "run_windows.ps1"
+
+# OPÇÃO 2: Usar Git (se instalado)
+git clone https://github.com/seu-repo/paradex-market-maker-bot.git
 cd paradex-market-maker-bot
 ```
 
-### 2. Executar instalação automática (Windows PowerShell)
+### 2. Verificar requisitos do sistema
+```powershell
+.\run_windows.ps1 -Diagnose
+```
+
+### 3. Instalar dependências
 ```powershell
 .\run_windows.ps1 -Install
 ```
 
-### 3. Configurar sua conta
+### 4. Configurar sua conta
 ```powershell
 .\run_windows.ps1 -Config
 ```
@@ -46,6 +67,11 @@ Edite o arquivo `config_windows.json` com suas credenciais:
         "api_secret": "..."
     }
 }
+```
+
+### 5. Testar instalação
+```powershell
+.\run_windows.ps1 -Test
 ```
 
 ## ⚙️ Configuração
@@ -161,6 +187,32 @@ Para operar outros pares além de SOL:
 }
 ```
 
+## 🛠️ Funcionalidades Avançadas
+
+### 📊 Sistema de Métricas
+- **Dashboard interativo** com métricas em tempo real
+- **Acompanhamento de P&L** diário e total
+- **Taxas de sucesso** e win rate
+- **Métricas de performance** detalhadas
+
+### 🔧 Ferramentas de Diagnóstico
+```powershell
+# Diagnóstico completo do sistema
+.\run_windows.ps1 -Diagnose
+
+# Testar instalação e configuração
+.\run_windows.ps1 -Test
+
+# Criar backup automático
+.\run_windows.ps1 -Backup
+```
+
+### ⚙️ Configuração Avançada
+- **Múltiplas estratégias** de market making
+- **Controle de risco** sofisticado
+- **Otimização para Windows** específica
+- **Sistema de backup** automático
+
 ## 🚨 Avisos Importantes
 
 ### ⚠️ Riscos
@@ -175,6 +227,7 @@ Para operar outros pares além de SOL:
 - **Não é à prova de falhas** - Exchanges podem mudar APIs
 - **Dependente de conexão** - Precisa de internet estável
 - **Não garante lucros** - Estratégia pode não ser rentável
+- **Requer manutenção** - Verifique regularmente por atualizações
 
 ## 🆘 Suporte e Problemas
 
