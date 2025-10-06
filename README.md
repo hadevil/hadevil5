@@ -1,15 +1,17 @@
-# 🤖 Market Maker Bot para Paradex - Airdrop Farming
+# 🤖 Market Maker Bot Otimizado para Paradex - Airdrop Farming
 
-Bot de market making otimizado para SOL na Paradex, focado em farming de airdrop com capital limitado (5k USD).
+Bot de market making **altamente otimizado** para SOL na Paradex, focado em **minimizar perdas** e **maximizar pontos de airdrop** com capital limitado (5k USD).
 
 ## ✨ Características Principais
 
-- **Market Making Adaptativo**: Spread dinâmico baseado em volatilidade, volume e tendência
-- **Gestão de Risco Avançada**: Circuit breaker, drawdown limits, position sizing inteligente
-- **Otimizado para Airdrop**: Foco em volume e frequência de trades para qualificação
-- **Capital Limitado**: Estratégias específicas para operar com 5k USD
-- **Windows/PowerShell**: Scripts de configuração e execução para Windows
-- **Monitoramento Completo**: Logs detalhados e métricas de performance
+- **🎯 Airdrop Farming Agressivo**: Estratégias específicas para maximizar pontos de airdrop
+- **🛡️ Proteção de Capital Avançada**: Sistema de minimização de perdas com controles dinâmicos
+- **⚡ Arbitragem Interna**: Detecta e explora oportunidades de arbitragem na própria exchange
+- **🔄 Mean Reversion Inteligente**: Aproveita movimentos de reversão à média
+- **🛡️ Hedging Automático**: Protege posições automaticamente
+- **📊 Modos Adaptativos**: Balanceado, Agressivo e Conservador baseado no desempenho
+- **🎯 Otimização de Volume**: Foco em atingir metas diárias de volume e trades
+- **💡 Controles Dinâmicos**: Ajusta parâmetros em tempo real baseado no progresso
 
 ## 🚀 Instalação Rápida
 
@@ -18,10 +20,10 @@ Bot de market making otimizado para SOL na Paradex, focado em farming de airdrop
 - Python 3.8+ ([Download](https://www.python.org/downloads/))
 - PowerShell 5.1+
 
-### 2. Configuração Automática
+### 2. Configuração Automática Otimizada
 ```powershell
 # Execute no PowerShell como Administrador
-.\setup_windows.ps1
+.\setup_optimized.ps1
 ```
 
 ### 3. Configurar API Keys
@@ -33,31 +35,37 @@ PARADEX_SECRET_KEY=sua_secret_key_aqui
 PARADEX_PASSPHRASE=sua_passphrase_aqui
 ```
 
-### 4. Executar o Bot
+### 4. Executar o Bot Otimizado
 ```powershell
-.\run_bot.ps1
+.\run_optimized.ps1
 ```
 
-## 📊 Estratégia de Market Making
+## 📊 Estratégias Avançadas de Market Making
 
-### Spread Adaptativo
-- **Base**: 0.1% de spread
-- **Volatilidade**: Aumenta spread em mercados voláteis
-- **Volume**: Reduz spread quando volume aumenta
-- **Tendência**: Ajusta spread baseado na direção do mercado
-- **Inventário**: Compensa desbalanceamento de posições
+### 🎯 Airdrop Farming Otimizado
+- **Volume Diário**: $1,500 por dia (30% do capital)
+- **Trades Diários**: 100 trades por dia
+- **Consistência**: Bônus de 20% por performance consistente
+- **Spread Agressivo**: 0.03% base para maximizar execuções
+- **Múltiplas Ordens**: Até 8 ordens por lado para mais execuções
 
-### Gestão de Risco
-- **Position Sizing**: Máximo 2% do capital por trade
+### 🛡️ Proteção de Capital Avançada
+- **Position Sizing Dinâmico**: 0.5% a 2% baseado no drawdown
 - **Drawdown Limit**: Para trading em 3% de drawdown
-- **Circuit Breaker**: Pausa após 5 perdas consecutivas
-- **Daily Loss Limit**: Máximo 5% de perda diária
+- **Emergency Stop**: 2% de perda máxima por trade
+- **Hedging Automático**: 80% do inventário é hedgeado
+- **Recovery Mode**: Estratégia conservadora após perdas
 
-### Otimizações para Airdrop
-- **Volume Target**: 20% do capital em volume diário
-- **Trade Frequency**: Mínimo 50 trades por dia
-- **Active Days**: Foco em consistência diária
-- **Spread Efficiency**: Balance entre lucro e volume
+### ⚡ Arbitragem e Mean Reversion
+- **Arbitragem Interna**: Detecta spreads > 0.05%
+- **Mean Reversion**: Aproveita desvios > 0.2% da média
+- **Hedging Inteligente**: Protege posições automaticamente
+- **Controles Dinâmicos**: Ajusta parâmetros em tempo real
+
+### 📊 Modos de Performance Adaptativos
+- **Agressivo**: Foco em airdrop farming (volume baixo)
+- **Balanceado**: Equilibrio entre lucro e volume
+- **Conservador**: Proteção de capital (drawdown alto)
 
 ## 🔧 Configurações Avançadas
 
