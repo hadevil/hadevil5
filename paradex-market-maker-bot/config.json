@@ -1,0 +1,37 @@
+{
+    "trading": {
+        "order_value_usd": {
+            "min": 10,
+            "max": 50
+        },
+        "order_duration_min": {
+            "min": 15,
+            "max": 45
+        },
+        "delay_between_orders_min": {
+            "min": 2,
+            "max": 8
+        },
+        "max_leverage": 1.5,
+        "max_position_ltv": 80,
+        "orders_distribution_noise": 0.1,
+        "retries": 3
+    },
+    "risk_management": {
+        "max_positions_per_cycle": 3,
+        "stop_loss_percentage": 5,
+        "take_profit_percentage": 2,
+        "max_daily_volume_usd": 1000
+    },
+    "pairs": {
+        "primary_pairs": ["SOL-USD"],
+        "fallback_pairs": ["ETH-USD", "BTC-USD"],
+        "min_volume_usd": 10000
+    },
+    "logging": {
+        "level": "INFO",
+        "file": "logs/trading.log",
+        "max_size_mb": 10
+    },
+    "debug": false
+}
