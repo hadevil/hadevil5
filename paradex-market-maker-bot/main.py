@@ -212,7 +212,8 @@ class ParadexMarketMaker:
             # Salvar configuração se necessário
             self._save_config_if_needed()
 
-            self.logger.info("✅ Conta configurada e validada com sucesso"            self._display_account_summary()
+            self.logger.info("✅ Conta configurada e validada com sucesso")
+            self._display_account_summary()
 
         except ValueError as e:
             self.logger.error(f"❌ Erro de validação: {e}")
@@ -735,7 +736,7 @@ class ParadexMarketMaker:
 
                 # Verifica se deve continuar
                 if cycle_count % 10 == 0:
-                    self.logger.info(f"📊 Status: {cycle_count} ciclos, Volume diário: ${self.daily_volume:.2f"
+                    self.logger.info(f"📊 Status: {cycle_count} ciclos, Volume diário: ${self.daily_volume:.2f}")
 
         except KeyboardInterrupt:
             self.logger.info("🛑 Interrompido pelo usuário")
