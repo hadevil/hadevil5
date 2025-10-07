@@ -735,7 +735,7 @@ class ParadexMarketMaker:
 
                 # Verifica se deve continuar
                 if cycle_count % 10 == 0:
-                    self.logger.info(f"📊 Status: {cycle_count} ciclos, Volume diário: ${self.daily_volume:.2".2f"
+                    self.logger.info(f"📊 Status: {cycle_count} ciclos, Volume diário: ${self.daily_volume:.2f"
 
         except KeyboardInterrupt:
             self.logger.info("🛑 Interrompido pelo usuário")
@@ -974,9 +974,9 @@ class ParadexMarketMaker:
             final_summary = self.get_performance_summary()
             print("\n📊 RESUMO FINAL DA SESSÃO:")
             print(f"   Total de operações: {final_summary['session']['total_trades']}")
-            print(f"   Volume total: ${final_summary['volume']['total']:.".2f")
-            print(f"   P&L total: ${final_summary['pnl']['total']:.".2f")
-            print(f"   Win rate: {final_summary['rates']['win_rate']:.".1f"")
+            print(f"   Volume total: ${final_summary['volume']['total']:.2f}")
+            print(f"   P&L total: ${final_summary['pnl']['total']:.2f}")
+            print(f"   Win rate: {final_summary['rates']['win_rate']:.1f}")
 
         print("👋 Até logo!")
         sys.exit(0)
