@@ -121,7 +121,8 @@ class ParadexMarketMaker:
                 self.logger.warning(f"⚠️  Parâmetro '{param}' não encontrado em trading config")
 
         # Log de configuração carregada
-        self.logger.info("✅ Configuração carregada com sucesso"        self.logger.info(f"   📊 Configuração: {self.config_path}")
+        self.logger.info("✅ Configuração carregada com sucesso")
+        self.logger.info(f"   📊 Configuração: {self.config_path}")
         self.logger.info(f"   💰 Capital base: $5,000")
         self.logger.info(f"   🎯 Par primário: {config.get('pairs', {}).get('primary_pairs', ['SOL-USD'])}")
 
@@ -357,7 +358,7 @@ class ParadexMarketMaker:
                 'timestamp': datetime.now().isoformat()
             }
 
-            self.logger.debug(f"📊 Dados de mercado para {pair}: ${current_price:.".2f")
+            self.logger.debug(f"📊 Dados de mercado para {pair}: ${current_price:.2f}")
             return market_data
 
         except Exception as e:
@@ -420,7 +421,7 @@ class ParadexMarketMaker:
             # Verifica volume diário
             max_daily_volume = self.config['risk_management']['max_daily_volume_usd']
             if self.daily_volume >= max_daily_volume:
-                self.logger.info(f"📊 Volume diário atingido: ${self.daily_volume:.".2f" > ${max_daily_volume:.".2f")
+                self.logger.info(f"📊 Volume diário atingido: ${self.daily_volume:.2f} > ${max_daily_volume:.2f}")
                 return False
 
             # Verifica se já passou 24h (reset diário)
@@ -458,7 +459,7 @@ class ParadexMarketMaker:
         self.performance_metrics['daily_pnl'] = 0.0
         self.start_time = datetime.now()
 
-        self.logger.info(f"🔄 Métricas diárias resetadas. Ontem: ${yesterday_volume:.".2f" PnL")
+        self.logger.info(f"🔄 Métricas diárias resetadas. Ontem: ${yesterday_volume:.2f} PnL")
 
     def _check_market_conditions(self) -> bool:
         """Verifica condições de mercado"""
@@ -484,7 +485,7 @@ class ParadexMarketMaker:
             # Verificar perda máxima diária
             max_daily_loss = self.config['risk_management'].get('max_loss_per_day_usd', 50)
             if self.performance_metrics['daily_pnl'] <= -max_daily_loss:
-                self.logger.warning(f"🛑 Perda diária máxima atingida: ${self.performance_metrics['daily_pnl']:.".2f")
+                self.logger.warning(f"🛑 Perda diária máxima atingida: ${self.performance_metrics['daily_pnl']:.2f}")
                 return False
 
             # Verificar número máximo de posições ativas (simulado)
@@ -582,12 +583,12 @@ class ParadexMarketMaker:
         current_price = self.get_market_data(pair)['price']
 
         self.logger.info(f"📈 Colocando ordens para {pair}:")
-        self.logger.info(f"   💰 Preço atual: ${current_price:.".2f")
-        self.logger.info(f"   🟢 BUY:  {buy_size:.".6f" @ ${buy_price:.".2f")
-        self.logger.info(f"   🔴 SELL: {sell_size:.".6f" @ ${sell_price:.".2f")
+        self.logger.info(f"   💰 Preço atual: ${current_price:.2f}")
+        self.logger.info(f"   🟢 BUY:  {buy_size:.6f} @ ${buy_price:.2f}")
+        self.logger.info(f"   🔴 SELL: {sell_size:.6f} @ ${sell_price:.2f}")
 
         spread_pct = ((sell_price - buy_price) / current_price) * 100
-        self.logger.info(f"   📊 Spread: {spread_pct:.".2f"")
+        self.logger.info(f"   📊 Spread: {spread_pct:.2f}")
 
     def _simulate_order_placement(self, pair: str, buy_price: float, sell_price: float,
                                 buy_size: float, sell_size: float) -> Dict:
@@ -625,7 +626,7 @@ class ParadexMarketMaker:
         if self.total_trades > 0:
             self.performance_metrics['win_rate'] = (self.successful_trades / self.total_trades) * 100
 
-        self.logger.debug(f"📊 Métricas atualizadas: Volume +${order_value:.".2f" PnL {simulated_pnl:."+.2f"")
+        self.logger.debug(f"📊 Métricas atualizadas: Volume +${order_value:.2f} PnL {simulated_pnl:+.2f}")
 
     def get_performance_summary(self) -> Dict:
         """Retorna resumo completo de performance"""
@@ -695,7 +696,7 @@ class ParadexMarketMaker:
                     self.config['trading']['order_duration_min']['max']
                 )
 
-                self.logger.info(f"⏱️  Monitorando por {monitoring_duration} minutos...")
+                self.logger.info(f"⏱️ Monitorando por {monitoring_duration} minutos...")
                 time.sleep(monitoring_duration * 60)
 
                 # Cancela ordens (em produção seria chamada real)
@@ -818,22 +819,22 @@ class ParadexMarketMaker:
         # Volume
         volume = performance['volume']
         print("\n💰 VOLUME:")
-        print(f"   Diário: ${volume['daily']:.".2f")
-        print(f"   Total: ${volume['total']:.".2f")
+        print(f"   Diário: ${volume['daily']:.2f}")
+        print(f"   Total: ${volume['total']:.2f}")
 
         # PnL
         pnl = performance['pnl']
         print("\n📈 P&L:")
-        print(f"   Diário: ${pnl['daily']:.".2f")
-        print(f"   Total: ${pnl['total']:.".2f")
-        print(f"   Melhor dia: ${pnl['best_day']:.".2f")
-        print(f"   Pior dia: ${pnl['worst_day']:.".2f")
+        print(f"   Diário: ${pnl['daily']:.2f}")
+        print(f"   Total: ${pnl['total']:.2f}")
+        print(f"   Melhor dia: ${pnl['best_day']:.2f}")
+        print(f"   Pior dia: ${pnl['worst_day']:.2f}")
 
         # Taxas
         rates = performance['rates']
         print("\n🎯 TAXAS:")
-        print(f"   Win Rate: {rates['win_rate']:.1".1f")
-        print(f"   Success Rate: {rates['success_rate']:.1".1f")
+        print(f"   Win Rate: {rates['win_rate']:.1f}")
+        print(f"   Success Rate: {rates['success_rate']:.1f}")
 
         input("\n🔄 Pressione Enter para continuar...")
 
@@ -849,12 +850,12 @@ class ParadexMarketMaker:
         print("📊 TRADING:")
         print(f"   Total de ordens: {trades['total_trades']}")
         print(f"   Ordens executadas: {trades['successful_trades']}")
-        print(f"   Taxa de execução: {(trades['successful_trades']/max(trades['total_trades'],1))*100:.".1f"")
+        print(f"   Taxa de execução: {(trades['successful_trades']/max(trades['total_trades'],1))*100:.1f}")
 
         # Eficiência
         if performance['volume']['daily'] > 0:
             avg_order_size = performance['volume']['daily'] / max(trades['total_trades'], 1)
-            print(f"   Tamanho médio da ordem: ${avg_order_size:.".2f")
+            print(f"   Tamanho médio da ordem: ${avg_order_size:.2f}")
 
         # Performance relativa
         capital_base = 5000
@@ -862,8 +863,8 @@ class ParadexMarketMaker:
         total_return_pct = (performance['pnl']['total'] / capital_base) * 100
 
         print("\n📊 PERFORMANCE RELATIVA:")
-        print(f"   Retorno diário: {daily_return_pct:.".2f"")
-        print(f"   Retorno total: {total_return_pct:.".2f"")
+        print(f"   Retorno diário: {daily_return_pct:.2f}")
+        print(f"   Retorno total: {total_return_pct:.2f}")
 
         input("\n🔄 Pressione Enter para continuar...")
 
@@ -901,7 +902,7 @@ class ParadexMarketMaker:
         config = self.config
         print("💰 TRADING:")
         trading = config.get('trading', {})
-        print(f"   Order Value: ${trading.get('order_value_usd', {}).get('min', 0)} - ${trading.get('order_value_usd', {}).get('max', 0)}")
+        print(f"   Order Value: ${trading.get('order_value_usd', {}).get('min', 0)} - ${trading.get('order_value_usd', {}).get('max', 0)})")
         print(f"   Max Leverage: {trading.get('max_leverage', 0)}x")
         print(f"   Max LTV: {trading.get('max_position_ltv', 0)}%")
 
