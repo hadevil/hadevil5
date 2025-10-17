@@ -304,6 +304,13 @@ class TradingBot:
             
             if not positions:
                 logger.warning("⚠️  No positions found during monitoring")
+                # Check if positions were closed manually
+                elapsed = self.position_manager.get_time_elapsed()
+                if elapsed > 1:  # More than 1 minute since start
+                    logger.error("🚨 POSITIONS CLOSED MANUALLY!")
+                    logger.error("   All positions were closed outside the bot")
+                    logger.error("   Bot will shutdown to prevent issues")
+                    return True, "MANUAL_CLOSE"
                 return True, "NO_POSITIONS"
             
             should_close, reason = self.position_manager.check_exit_conditions(positions)
@@ -366,6 +373,19 @@ class TradingBot:
                     logger.debug(f"Could not get PnL: {e}")
                 
                 if should_close and reason != "MONITOR_ERROR":
+                    # Check if manual close
+                    if reason == "MANUAL_CLOSE":
+                        logger.error("")
+                        logger.error("=" * 80)
+                        logger.error("🚨 MANUAL CLOSURE DETECTED")
+                        logger.error("=" * 80)
+                        logger.error("   Positions were closed manually on the platform")
+                        logger.error("   Bot cannot continue safely - STOPPING")
+                        logger.error("=" * 80)
+                        logger.error("")
+                        self.stop()
+                        return False
+                    
                     # Get final positions for PnL
                     positions = self.apex_client.get_positions()
                     total_pnl = self.position_manager.calculate_total_pnl(positions)

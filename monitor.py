@@ -115,7 +115,8 @@ def print_cycle_end(reason: str, total_pnl: float, duration_minutes: int):
     reason_messages = {
         'STOP_LOSS': '🛑 STOP LOSS TRIGGERED',
         'TAKE_PROFIT': '🎯 TAKE PROFIT TRIGGERED',
-        'TIME_LIMIT': '⏰ TIME LIMIT REACHED'
+        'TIME_LIMIT': '⏰ TIME LIMIT REACHED',
+        'MANUAL_CLOSE': '🚨 MANUAL CLOSURE DETECTED'
     }
     
     message = reason_messages.get(reason, f"📍 CYCLE ENDED: {reason}")
