@@ -1,14 +1,5 @@
-# Credentials and sensitive files
+# Sensitive config
 config.txt
-*.env
-.env*
-
-# Logs
-logs/
-*.log
-
-# State files
-state.json
 
 # Python
 __pycache__/
@@ -16,26 +7,19 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 
-# Virtual Environment
+# Virtual Environment (NOVO!)
 venv/
-ENV/
 env/
+ENV/
+
+# Database
+*.db
+*.db-journal
+
+# Logs
+logs/
+*.log
 
 # IDE
 .vscode/
@@ -47,7 +31,3 @@ env/
 # OS
 .DS_Store
 Thumbs.db
-
-# Temporary
-*.tmp
-temp/
