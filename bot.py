@@ -5,11 +5,14 @@ Orchestrates the entire trading cycle: open, monitor, close, reopen
 
 import time
 import logging
+import uuid
 from typing import Dict, List, Optional
 from datetime import datetime
 
 from apex_client import ApexClient
 from position_manager import PositionManager
+from database import TradingDatabase
+from logger_config import audit_logger
 from monitor import (
     print_cycle_start, print_cycle_end, print_waiting_reentry,
     print_error
