@@ -263,32 +263,23 @@ class ApexClient:
             ]
             
             # Calculate unrealized PnL and add market price for each position
-            logger.debug(f"🔍 Calculating PnL for {len(active_positions)} active positions")
-            
             for pos in active_positions:
                 symbol = pos['symbol']
                 try:
-                    logger.debug(f"   Processing {symbol}...")
-                    
                     # Get current price
-                    logger.debug(f"   Fetching ticker for {symbol}")
                     ticker = self.public_client.ticker_v3(symbol=symbol)
                     ticker_data = ticker['data']
                     if isinstance(ticker_data, list):
                         ticker_data = ticker_data[0]
                     current_price = float(ticker_data['lastPrice'])
-                    logger.debug(f"   Current price: ${current_price:.2f}")
                     
                     # Add mark price (use last price as approximation)
                     pos['markPrice'] = current_price
                     
                     # Calculate PnL
-                    logger.debug(f"   Calculating PnL...")
                     pnl = self.calculate_unrealized_pnl(pos, current_price)
                     pos['unrealizedPnl'] = pnl
                     pos['realizedPnl'] = 0.0  # Not available from API
-                    
-                    logger.debug(f"   ✅ {symbol}: PnL=${pnl:+.2f}")
                     
                 except Exception as e:
                     logger.error(f"❌ Failed to calculate PnL for {symbol}: {e}")
@@ -322,46 +313,37 @@ class ApexClient:
             size_str = position.get('size', '0')
             entry_price_str = position.get('entryPrice', '0')
             
-            logger.debug(f"      Raw data: size={size_str}, entryPrice={entry_price_str}, side={side}")
-            
             # Convert to float
             size = float(size_str)
             entry_price = float(entry_price_str)
             
             # Validate data
             if size == 0:
-                logger.warning(f"      Size is 0 for {symbol} - position not filled yet?")
+                logger.warning(f"⚠️  Size is 0 for {symbol} - position not filled yet")
                 return 0.0
             
             if entry_price == 0:
-                logger.warning(f"      Entry price is 0 for {symbol} - position not filled yet?")
+                logger.warning(f"⚠️  Entry price is 0 for {symbol} - position not filled yet")
                 return 0.0
             
             # Get current market price if not provided
             if current_price is None:
-                logger.debug(f"      Fetching current price for {symbol}")
                 ticker = self.public_client.ticker_v3(symbol=symbol)
                 ticker_data = ticker['data']
                 if isinstance(ticker_data, list):
                     ticker_data = ticker_data[0]
                 current_price = float(ticker_data['lastPrice'])
             
-            logger.debug(f"      Entry: ${entry_price:.2f}, Current: ${current_price:.2f}, Size: {size}")
-            
             # Calculate PnL based on direction
             if side == 'LONG':
                 # Long: profit when price goes up
                 price_diff = current_price - entry_price
-                logger.debug(f"      LONG: price_diff = {current_price} - {entry_price} = {price_diff}")
             else:  # SHORT
                 # Short: profit when price goes down
                 price_diff = entry_price - current_price
-                logger.debug(f"      SHORT: price_diff = {entry_price} - {current_price} = {price_diff}")
             
             # PnL = price_difference * position_size
             pnl = price_diff * size
-            
-            logger.info(f"📊 {symbol} {side}: Entry=${entry_price:.2f}, Current=${current_price:.2f}, Diff=${price_diff:+.2f}, Size={size}, PnL=${pnl:+.2f}")
             
             return pnl
             

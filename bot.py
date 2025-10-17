@@ -437,10 +437,6 @@ class TradingBot:
                 try:
                     positions = self.apex_client.get_positions()
                     if positions:
-                        logger.debug(f"🔍 Got {len(positions)} positions for PnL calculation")
-                        for p in positions:
-                            logger.debug(f"   - {p['symbol']} {p['side']}: unrealizedPnl={p.get('unrealizedPnl', 'N/A')}")
-                        
                         total_pnl = self.position_manager.calculate_total_pnl(positions)
                         elapsed = self.position_manager.get_time_elapsed()
                         logger.info(f"💰 PnL: ${total_pnl:+.2f} | Time: {elapsed}/{self.config['TIME_LIMIT_MINUTES']}min | Target: TP=${self.config['TAKE_PROFIT_USD']:+.0f} SL=${self.config['STOP_LOSS_USD']:+.0f}")
