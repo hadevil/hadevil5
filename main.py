@@ -91,11 +91,26 @@ def main():
             shutdown_count[0] += 1
             
             if shutdown_count[0] == 1:
-                logger.info(f"\n⚠️  Received Ctrl+C, shutting down gracefully...")
-                logger.info("   (Press Ctrl+C again to force kill)")
-                bot.stop()
+                logger.info("")
+                logger.info("="*80)
+                logger.info("⚠️  CTRL+C PRESSED - GRACEFUL SHUTDOWN")
+                logger.info("="*80)
+                logger.info("   Bot will close all positions and stop safely")
+                logger.info("   This may take 10-30 seconds...")
+                logger.info("")
+                logger.info("   💡 Press Ctrl+C again to FORCE KILL (not recommended!)")
+                logger.info("="*80)
+                logger.info("")
+                bot.stop(close_positions=True)
             elif shutdown_count[0] >= 2:
-                logger.error("\n🚨 FORCE KILL - Exiting immediately!")
+                logger.error("")
+                logger.error("="*80)
+                logger.error("🚨 FORCE KILL - EXITING IMMEDIATELY!")
+                logger.error("="*80)
+                logger.error("⚠️  Positions were NOT closed!")
+                logger.error("   Please check your exchange and close manually if needed")
+                logger.error("="*80)
+                logger.error("")
                 import os
                 os._exit(1)
         

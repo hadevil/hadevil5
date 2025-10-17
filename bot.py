@@ -349,9 +349,20 @@ class TradingBot:
                 # Check if positions were closed manually
                 elapsed = self.position_manager.get_time_elapsed()
                 if elapsed > 1:  # More than 1 minute since start
-                    logger.error("🚨 POSITIONS CLOSED MANUALLY!")
-                    logger.error("   All positions were closed outside the bot")
-                    logger.error("   Bot will shutdown to prevent issues")
+                    logger.error("")
+                    logger.error("="*80)
+                    logger.error("🚨 MANUAL POSITION CLOSURE DETECTED!")
+                    logger.error("="*80)
+                    logger.error("   Someone closed the positions manually on the platform")
+                    logger.error("   This breaks the bot's position management")
+                    logger.error("")
+                    logger.error("   🛑 BOT WILL CRASH NOW TO PREVENT FURTHER ISSUES")
+                    logger.error("")
+                    logger.error("   If you want to close positions safely:")
+                    logger.error("   1. Press Ctrl+C (bot will close positions automatically)")
+                    logger.error("   2. Or let the bot manage positions itself")
+                    logger.error("="*80)
+                    logger.error("")
                     return True, "MANUAL_CLOSE"
                 return True, "NO_POSITIONS"
             
@@ -448,18 +459,20 @@ class TradingBot:
                     logger.error(traceback.format_exc())
                 
                 if should_close and reason != "MONITOR_ERROR":
-                    # Check if manual close
+                    # Check if manual close - CRASH THE BOT
                     if reason == "MANUAL_CLOSE":
+                        # Stop the bot (no positions to close, already closed manually)
+                        self.stop(close_positions=False)
+                        
+                        # Force crash with clear error
                         logger.error("")
-                        logger.error("=" * 80)
-                        logger.error("🚨 MANUAL CLOSURE DETECTED")
-                        logger.error("=" * 80)
-                        logger.error("   Positions were closed manually on the platform")
-                        logger.error("   Bot cannot continue safely - STOPPING")
-                        logger.error("=" * 80)
+                        logger.error("💥 CRASHING BOT DUE TO MANUAL POSITION CLOSURE")
                         logger.error("")
-                        self.stop()
-                        return False
+                        raise RuntimeError(
+                            "Bot crashed: Positions were closed manually on the platform. "
+                            "This is not allowed during bot operation. "
+                            "Use Ctrl+C to safely close positions instead."
+                        )
                     
                     # Get final positions for PnL
                     positions = self.apex_client.get_positions()
