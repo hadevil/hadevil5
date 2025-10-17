@@ -247,10 +247,10 @@ class ApexClient:
     
     def get_positions(self) -> List[Dict]:
         """
-        Get all open positions
+        Get all open positions with calculated unrealized PnL
         
         Returns:
-            List of position dictionaries
+            List of position dictionaries with unrealizedPnl added
         """
         try:
             account = self.get_account()
@@ -262,11 +262,84 @@ class ApexClient:
                 if pos.get('size') and float(pos['size']) != 0
             ]
             
+            # Calculate unrealized PnL and add market price for each position
+            for pos in active_positions:
+                try:
+                    # Get current price
+                    symbol = pos['symbol']
+                    ticker = self.public_client.ticker_v3(symbol=symbol)
+                    ticker_data = ticker['data']
+                    if isinstance(ticker_data, list):
+                        ticker_data = ticker_data[0]
+                    current_price = float(ticker_data['lastPrice'])
+                    
+                    # Add mark price (use last price as approximation)
+                    pos['markPrice'] = current_price
+                    
+                    # Calculate PnL
+                    pnl = self.calculate_unrealized_pnl(pos, current_price)
+                    pos['unrealizedPnl'] = pnl
+                    pos['realizedPnl'] = 0.0  # Not available from API
+                except Exception as e:
+                    logger.warning(f"⚠️  Failed to calculate PnL for {pos['symbol']}: {e}")
+                    pos['unrealizedPnl'] = 0.0
+                    pos['realizedPnl'] = 0.0
+                    pos['markPrice'] = float(pos.get('entryPrice', 0))
+            
             return active_positions
             
         except Exception as e:
             logger.error(f"❌ Failed to get positions: {e}")
             raise
+    
+    def calculate_unrealized_pnl(self, position: Dict, current_price: Optional[float] = None) -> float:
+        """
+        Calculate unrealized PnL for a position manually
+        (Apex Omni API doesn't return unrealizedPnl in positions)
+        
+        Args:
+            position: Position dictionary with symbol, side, size, entryPrice
+            current_price: Optional current price (if not provided, will fetch from ticker)
+            
+        Returns:
+            Unrealized PnL in USD
+        """
+        try:
+            symbol = position['symbol']
+            side = position['side']
+            size = float(position.get('size', 0))
+            entry_price = float(position.get('entryPrice', 0))
+            
+            # Validate data
+            if size == 0 or entry_price == 0:
+                return 0.0
+            
+            # Get current market price if not provided
+            if current_price is None:
+                ticker = self.public_client.ticker_v3(symbol=symbol)
+                ticker_data = ticker['data']
+                if isinstance(ticker_data, list):
+                    ticker_data = ticker_data[0]
+                current_price = float(ticker_data['lastPrice'])
+            
+            # Calculate PnL based on direction
+            if side == 'LONG':
+                # Long: profit when price goes up
+                price_diff = current_price - entry_price
+            else:  # SHORT
+                # Short: profit when price goes down
+                price_diff = entry_price - current_price
+            
+            # PnL = price_difference * position_size
+            pnl = price_diff * size
+            
+            logger.debug(f"📊 {symbol} {side}: Entry=${entry_price:.2f}, Current=${current_price:.2f}, PnL=${pnl:.2f}")
+            
+            return pnl
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to calculate PnL: {e}")
+            return 0.0
     
     def get_worst_price(self, symbol: str, side: str, size: str) -> str:
         """
@@ -375,7 +448,18 @@ class ApexClient:
                 timeInForce="IMMEDIATE_OR_CANCEL"
             )
             
-            logger.info(f"✅ Order created: {order.get('data', {}).get('id', 'N/A')}")
+            # Check order status
+            order_id = order.get('data', {}).get('id', 'N/A')
+            order_status = order.get('data', {}).get('status', 'UNKNOWN')
+            
+            logger.info(f"✅ Order created: ID={order_id}, Status={order_status}")
+            
+            # Warn if order might not be filled
+            if order_status in ['PENDING', 'UNTRIGGERED']:
+                logger.warning(f"⚠️  Order {order_id} is {order_status}, may not fill immediately")
+            elif order_status == 'FILLED':
+                logger.info(f"🎯 Order {order_id} FILLED successfully")
+            
             return order
             
         except Exception as e:
