@@ -134,16 +134,28 @@ class ApexClient:
             # Use get_account_v3 which returns account info including balance
             account_data = self.resilient_client.call('get_account_v3')
             
+            # Log top-level structure for debugging
+            logger.debug(f"🔍 Account data top-level keys: {list(account_data.keys())}")
+            
             # Response structure varies - try multiple paths
             balance = None
             
-            # PATH 1: Check contractWallets (most common for perpetual trading)
+            # PATH 1: Check contractWallets (CORRECT for Apex Omni perpetual trading)
             if 'contractWallets' in account_data:
+                logger.debug(f"✅ Found contractWallets with {len(account_data['contractWallets'])} wallets")
                 for wallet in account_data['contractWallets']:
-                    if wallet.get('token') == 'USDT':
-                        balance = float(wallet.get('balance', 0))
-                        logger.debug(f"💰 Balance from contractWallets: ${balance:.2f}")
+                    token = wallet.get('token', 'UNKNOWN')
+                    wallet_balance = wallet.get('balance', '0')
+                    logger.debug(f"   Wallet: token={token}, balance={wallet_balance}")
+                    
+                    if token == 'USDT':
+                        balance = float(wallet_balance)
+                        logger.info(f"💰 Balance from contractWallets: ${balance:.2f} USDT")
                         return balance
+                
+                logger.warning("⚠️  No USDT wallet found in contractWallets")
+            else:
+                logger.warning("⚠️  contractWallets not found in response")
             
             # PATH 2: Check data.account (alternative structure)
             if 'data' in account_data and 'account' in account_data['data']:
