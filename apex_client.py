@@ -125,7 +125,7 @@ class ApexClient:
     
     def get_balance(self) -> float:
         """
-        Get available balance in USD from account
+        Get available balance in USDT from account
         
         Returns:
             Available balance in USDT
@@ -134,36 +134,43 @@ class ApexClient:
             # Use get_account_v3 which returns account info including balance
             account_data = self.resilient_client.call('get_account_v3')
             
-            # Response structure: {"code": 0, "data": {"account": {...}}}
+            # Response structure varies - try multiple paths
+            balance = None
+            
+            # PATH 1: Check contractWallets (most common for perpetual trading)
+            if 'contractWallets' in account_data:
+                for wallet in account_data['contractWallets']:
+                    if wallet.get('token') == 'USDT':
+                        balance = float(wallet.get('balance', 0))
+                        logger.debug(f"💰 Balance from contractWallets: ${balance:.2f}")
+                        return balance
+            
+            # PATH 2: Check data.account (alternative structure)
             if 'data' in account_data and 'account' in account_data['data']:
                 account = account_data['data']['account']
                 
-                # Try different possible fields
-                balance = None
-                
-                # Option 1: availableBalance
+                # Try availableBalance
                 if 'availableBalance' in account:
                     balance = float(account['availableBalance'])
-                    logger.debug(f"💰 Balance from availableBalance: ${balance:.2f}")
+                    logger.debug(f"💰 Balance from data.account.availableBalance: ${balance:.2f}")
                     return balance
                 
-                # Option 2: equity (total equity)
+                # Try equity
                 if 'equity' in account:
                     balance = float(account['equity'])
-                    logger.debug(f"💰 Balance from equity: ${balance:.2f}")
+                    logger.debug(f"💰 Balance from data.account.equity: ${balance:.2f}")
                     return balance
-                
-                # Option 3: totalValue
-                if 'totalValue' in account:
-                    balance = float(account['totalValue'])
-                    logger.debug(f"💰 Balance from totalValue: ${balance:.2f}")
-                    return balance
-                
-                # Log the account structure for debugging
-                logger.warning(f"⚠️  Could not find balance field. Account keys: {list(account.keys())}")
-                logger.debug(f"Account data: {account}")
             
-            logger.warning(f"⚠️  Unexpected account response structure: {account_data}")
+            # PATH 3: Check spotWallets as fallback
+            if 'spotWallets' in account_data:
+                for wallet in account_data['spotWallets']:
+                    if wallet.get('tokenId') == '141':  # USDT token ID
+                        balance = float(wallet.get('balance', 0))
+                        logger.debug(f"💰 Balance from spotWallets: ${balance:.2f}")
+                        return balance
+            
+            # If we get here, couldn't find balance
+            logger.warning(f"⚠️  Could not find balance in response. Top-level keys: {list(account_data.keys())}")
             return 0.0
             
         except Exception as e:
