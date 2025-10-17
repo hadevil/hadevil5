@@ -35,6 +35,7 @@ class TradingBot:
         self.cycle_count = 0
         self.is_running = False
         self.current_cycle_id = None
+        self.shutdown_event = threading.Event()  # For immediate interruption
         
         # Initialize components
         logger.info("🔧 Initializing bot components...")
@@ -526,6 +527,14 @@ class TradingBot:
         # Try to close any open positions
         try:
             positions = self.apex_client.get_positions()
+            if positions:
+                logger.info("🔒 Closing open positions...")
+                self.close_all_positions(reason="SHUTDOWN")
+        except Exception as e:
+            logger.error(f"❌ Error closing positions during shutdown: {e}")
+        
+        logger.info("✅ Bot stopped")
+ns = self.apex_client.get_positions()
             if positions:
                 logger.info("🔒 Closing open positions...")
                 self.close_all_positions(reason="SHUTDOWN")

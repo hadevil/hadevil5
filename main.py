@@ -85,10 +85,19 @@ def main():
         bot = TradingBot(config)
         
         # Setup signal handlers for graceful shutdown
+        shutdown_count = [0]  # Use list to modify in nested function
+        
         def signal_handler(sig, frame):
-            logger.info(f"\n⚠️  Received signal {sig}, shutting down gracefully...")
-            bot.stop()
-            sys.exit(0)
+            shutdown_count[0] += 1
+            
+            if shutdown_count[0] == 1:
+                logger.info(f"\n⚠️  Received Ctrl+C, shutting down gracefully...")
+                logger.info("   (Press Ctrl+C again to force kill)")
+                bot.stop()
+            elif shutdown_count[0] >= 2:
+                logger.error("\n🚨 FORCE KILL - Exiting immediately!")
+                import os
+                os._exit(1)
         
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
