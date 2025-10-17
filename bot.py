@@ -139,8 +139,20 @@ class TradingBot:
                     self.position_manager.add_closed_position(pos, reason, pnl)
                     
                     # Close the position
-                    self.apex_client.close_position(pos)
+                    close_order = self.apex_client.close_position(pos)
                     logger.info(f"   ✅ Closed {pos['symbol']} {pos['side']}")
+                    
+                    # Record in database
+                    if self.current_cycle_id:
+                        exit_price = float(pos.get('markPrice', pos.get('entryPrice', 0)))
+                        self.database.record_position_close(
+                            self.current_cycle_id,
+                            pos['symbol'],
+                            exit_price,
+                            pnl,
+                            reason,
+                            fees=0  # TODO: get fees from order response
+                        )
                     
                     # Small delay between closes
                     time.sleep(0.5)
@@ -284,6 +296,15 @@ class TradingBot:
                     opened_positions.append(symbol)
                     logger.info(f"   ✅ {symbol} SHORT opened")
                     
+                    # Record in database
+                    position_data = {
+                        'symbol': symbol,
+                        'side': 'SHORT',
+                        'size': size,
+                        'entryPrice': order.get('data', {}).get('price', '0')
+                    }
+                    self.database.record_position_open(self.current_cycle_id, position_data, self.config)
+                    
                     # Small delay between orders
                     time.sleep(0.5)
                     
@@ -357,8 +378,12 @@ class TradingBot:
         self.cycle_count += 1
         print_cycle_start(self.cycle_count)
         
+        # Generate unique cycle ID
+        self.current_cycle_id = f"cycle_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{self.cycle_count}"
+        
         # Start new cycle tracking
         self.position_manager.start_new_cycle()
+        self.database.start_cycle(self.current_cycle_id, self.config)
         
         # Open all positions
         if not self.open_all_positions():
@@ -409,6 +434,9 @@ class TradingBot:
                     
                     # Print cycle end
                     print_cycle_end(reason, total_pnl, duration)
+                    
+                    # Record cycle end in database
+                    self.database.end_cycle(self.current_cycle_id, total_pnl, reason, duration)
                     
                     # Close all positions
                     if not self.close_all_positions(reason):

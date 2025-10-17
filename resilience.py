@@ -307,7 +307,7 @@ class ResilientAPIClient:
     
     def call(self, method_name: str, *args, **kwargs) -> Any:
         """
-        Make API call with full resilience
+        Make API call with full resilience (rate limiting + circuit breaker + retry)
         
         Args:
             method_name: Name of method to call on base client
@@ -325,19 +325,29 @@ class ResilientAPIClient:
         
         # Execute with retry and circuit breaker
         start_time = time.time()
+        backoff = ExponentialBackoff(base_delay=1.0, max_retries=3)
         
-        try:
-            result = self.circuit_breaker.call(method, *args, **kwargs)
-            
-            # Record success
-            response_time_ms = (time.time() - start_time) * 1000
-            self.health_checker.record_success(response_time_ms)
-            
-            return result
-        except Exception as e:
-            # Record failure
-            self.health_checker.record_failure(e)
-            raise
+        for attempt in range(4):  # 3 retries + 1 initial attempt
+            try:
+                result = self.circuit_breaker.call(method, *args, **kwargs)
+                
+                # Record success
+                response_time_ms = (time.time() - start_time) * 1000
+                self.health_checker.record_success(response_time_ms)
+                
+                return result
+            except Exception as e:
+                # Record failure
+                self.health_checker.record_failure(e)
+                
+                if attempt < 3:  # Not the last attempt
+                    delay = backoff.get_delay(attempt)
+                    logger.warning(f"⚠️  API call {method_name} failed (attempt {attempt + 1}/4), retrying in {delay:.1f}s: {e}")
+                    time.sleep(delay)
+                else:
+                    # Last attempt failed
+                    logger.error(f"❌ API call {method_name} failed after 4 attempts: {e}")
+                    raise
     
     def get_health_status(self) -> dict:
         """Get current health status"""
