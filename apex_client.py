@@ -125,23 +125,51 @@ class ApexClient:
     
     def get_balance(self) -> float:
         """
-        Get available balance in USD
+        Get available balance in USD from account
         
         Returns:
-            Available balance
+            Available balance in USDT
         """
         try:
-            balance_data = self.resilient_client.call('get_account_balance_v3')
-            balances = balance_data.get('data', {}).get('balances', [])
+            # Use get_account_v3 which returns account info including balance
+            account_data = self.resilient_client.call('get_account_v3')
             
-            # Find USDT balance
-            for bal in balances:
-                if bal.get('token') == 'USDT':
-                    return float(bal.get('availableBalance', 0))
+            # Response structure: {"code": 0, "data": {"account": {...}}}
+            if 'data' in account_data and 'account' in account_data['data']:
+                account = account_data['data']['account']
+                
+                # Try different possible fields
+                balance = None
+                
+                # Option 1: availableBalance
+                if 'availableBalance' in account:
+                    balance = float(account['availableBalance'])
+                    logger.debug(f"💰 Balance from availableBalance: ${balance:.2f}")
+                    return balance
+                
+                # Option 2: equity (total equity)
+                if 'equity' in account:
+                    balance = float(account['equity'])
+                    logger.debug(f"💰 Balance from equity: ${balance:.2f}")
+                    return balance
+                
+                # Option 3: totalValue
+                if 'totalValue' in account:
+                    balance = float(account['totalValue'])
+                    logger.debug(f"💰 Balance from totalValue: ${balance:.2f}")
+                    return balance
+                
+                # Log the account structure for debugging
+                logger.warning(f"⚠️  Could not find balance field. Account keys: {list(account.keys())}")
+                logger.debug(f"Account data: {account}")
             
+            logger.warning(f"⚠️  Unexpected account response structure: {account_data}")
             return 0.0
+            
         except Exception as e:
             logger.error(f"❌ Failed to get balance: {e}")
+            import traceback
+            logger.debug(traceback.format_exc())
             return 0.0
     
     def validate_balance(self, required_usd: float) -> bool:
@@ -149,22 +177,53 @@ class ApexClient:
         Validate if sufficient balance available
         
         Args:
-            required_usd: Required USD amount
+            required_usd: Required USD amount (margin needed with leverage)
             
         Returns:
             True if sufficient balance
         """
         try:
             balance = self.get_balance()
+            
+            # If balance is 0, might be a parsing issue - log account info
+            if balance == 0.0:
+                logger.warning("⚠️  Balance returned 0. Fetching account details for debug...")
+                try:
+                    account = self.private_client.get_account_v3()
+                    logger.info(f"📊 Account response keys: {list(account.keys())}")
+                    if 'data' in account:
+                        logger.info(f"📊 Data keys: {list(account['data'].keys())}")
+                        if 'account' in account['data']:
+                            acc = account['data']['account']
+                            logger.info(f"📊 Account keys: {list(acc.keys())}")
+                            logger.info(f"📊 Account info: equity={acc.get('equity')}, "
+                                       f"available={acc.get('availableBalance')}, "
+                                       f"totalValue={acc.get('totalValue')}")
+                except Exception as debug_e:
+                    logger.error(f"Debug fetch failed: {debug_e}")
+            
             logger.info(f"💰 Balance check: ${balance:.2f} available, ${required_usd:.2f} required")
             
-            if balance < required_usd:
-                logger.error(f"❌ Insufficient balance: ${balance:.2f} < ${required_usd:.2f}")
+            if balance <= 0.0:
+                logger.error(f"❌ Balance is zero or negative: ${balance:.2f}")
+                logger.error("   This might indicate:")
+                logger.error("   1. No funds in account")
+                logger.error("   2. API parsing issue")
+                logger.error("   3. Wrong account/network")
                 return False
             
+            if balance < required_usd:
+                logger.warning(f"⚠️  Low balance: ${balance:.2f} < ${required_usd:.2f}")
+                logger.warning(f"   Consider reducing position size or adding funds")
+                return False
+            
+            logger.info(f"✅ Sufficient balance: ${balance:.2f} >= ${required_usd:.2f}")
             return True
+            
         except Exception as e:
             logger.error(f"❌ Balance validation failed: {e}")
+            import traceback
+            logger.debug(traceback.format_exc())
             return False
     
     def get_positions(self) -> List[Dict]:
