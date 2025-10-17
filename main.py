@@ -74,6 +74,8 @@ def main():
         logger = setup_logging()
         
         # Load configuration
+        import logging
+        logger = logging.getLogger(__name__)
         logger.info("📁 Loading configuration...")
         config = load_config("config.txt")
         print_config_summary(config)

@@ -31,11 +31,13 @@ class TradingBot:
         self.config = config
         self.cycle_count = 0
         self.is_running = False
+        self.current_cycle_id = None
         
         # Initialize components
         logger.info("🔧 Initializing bot components...")
         self.apex_client = ApexClient(config)
         self.position_manager = PositionManager(config, self.apex_client)
+        self.database = TradingDatabase()
         
         # Parse trading symbols
         self.symbols_long = self._parse_symbols(config['LONG_SYMBOLS'])
@@ -213,6 +215,20 @@ class TradingBot:
         try:
             position_size_usd = float(self.config['POSITION_SIZE_USD'])
             leverage = int(self.config['LEVERAGE'])
+            
+            # Calculate total required balance
+            total_assets = len(self.symbols_long) + len(self.symbols_short)
+            total_required = position_size_usd * total_assets
+            
+            # Validate balance
+            logger.info(f"💰 Validating balance for {total_assets} positions...")
+            if not self.apex_client.validate_balance(total_required):
+                logger.error(f"❌ Insufficient balance for opening positions")
+                audit_logger.log_action('balance_validation_failed', {
+                    'required': total_required,
+                    'positions': total_assets
+                })
+                return False
             
             logger.info(f"📈 Opening positions: ${position_size_usd} per asset @ {leverage}x leverage")
             

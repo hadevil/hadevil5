@@ -16,6 +16,9 @@ from apexomni.http_public import HttpPublic
 from apexomni.constants import APEX_OMNI_HTTP_MAIN, NETWORKID_OMNI_MAIN_ARB
 from apexomni.helpers.util import round_size
 
+from resilience import ResilientAPIClient, with_retry
+from logger_config import performance_metrics, PerformanceLogger
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,6 +42,9 @@ class ApexClient:
         # Cache for symbol configurations
         self.symbol_configs = {}
         self.load_symbol_configs()
+        
+        # Wrap with resilient client
+        self.resilient_client = ResilientAPIClient(self.private_client, rate_limit=10)
         
     def _init_clients(self):
         """Initialize HTTP clients for public and private endpoints"""
@@ -110,11 +116,56 @@ class ApexClient:
             Dictionary with account info
         """
         try:
-            account = self.private_client.get_account_v3()
+            with PerformanceLogger('get_account', performance_metrics):
+                account = self.resilient_client.call('get_account_v3')
             return account
         except Exception as e:
             logger.error(f"❌ Failed to get account: {e}")
             raise
+    
+    def get_balance(self) -> float:
+        """
+        Get available balance in USD
+        
+        Returns:
+            Available balance
+        """
+        try:
+            balance_data = self.resilient_client.call('get_account_balance_v3')
+            balances = balance_data.get('data', {}).get('balances', [])
+            
+            # Find USDT balance
+            for bal in balances:
+                if bal.get('token') == 'USDT':
+                    return float(bal.get('availableBalance', 0))
+            
+            return 0.0
+        except Exception as e:
+            logger.error(f"❌ Failed to get balance: {e}")
+            return 0.0
+    
+    def validate_balance(self, required_usd: float) -> bool:
+        """
+        Validate if sufficient balance available
+        
+        Args:
+            required_usd: Required USD amount
+            
+        Returns:
+            True if sufficient balance
+        """
+        try:
+            balance = self.get_balance()
+            logger.info(f"💰 Balance check: ${balance:.2f} available, ${required_usd:.2f} required")
+            
+            if balance < required_usd:
+                logger.error(f"❌ Insufficient balance: ${balance:.2f} < ${required_usd:.2f}")
+                return False
+            
+            return True
+        except Exception as e:
+            logger.error(f"❌ Balance validation failed: {e}")
+            return False
     
     def get_positions(self) -> List[Dict]:
         """
