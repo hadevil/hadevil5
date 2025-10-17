@@ -24,19 +24,25 @@ config = load_config()
 
 # Import after loading config
 from apexomni.http_private_sign import HttpPrivateSign
+from apexomni.constants import NETWORKID_OMNI_MAIN_ARB
 
 print("="*60)
 print("🔍 DEBUGGING BALANCE API")
 print("="*60)
 print()
 
-# Initialize client
+# Initialize client (correct parameters based on SDK)
 client = HttpPrivateSign(
-    api_key=config['API_KEY'],
-    api_secret=config['API_SECRET'],
-    passphrase=config['API_PASSPHRASE'],
-    zk_seeds=config['ZK_SEEDS'],
-    zk_l2key=config.get('ZK_L2KEY', '')
+    network_id=int(config.get('NETWORK_ID', NETWORKID_OMNI_MAIN_ARB)),
+    api_key_credentials={
+        'key': config['API_KEY'],
+        'secret': config['API_SECRET'],
+        'passphrase': config['API_PASSPHRASE']
+    },
+    zk_credentials={
+        'seeds': config['ZK_SEEDS'],
+        'l2_key': config.get('ZK_L2KEY', '')
+    }
 )
 
 print("1️⃣  Testing get_account_v3()...")
