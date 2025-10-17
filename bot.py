@@ -436,27 +436,36 @@ class TradingBot:
         
         # Monitor loop
         logger.info("👀 Starting monitoring loop...")
+        logger.info("   ⏱️  Checking SL/TP every 15 seconds")
+        logger.info("   📊 Showing status every 5 minutes")
+        logger.info("")
+        
         last_status_time = time.time()
+        last_pnl_display_time = time.time()
         status_interval = 5 * 60  # 5 minutes in seconds
+        pnl_display_interval = 5 * 60  # 5 minutes in seconds
         
         while self.is_running:
             try:
-                # Check exit conditions
+                # Check exit conditions (every 15 seconds)
                 should_close, reason = self.monitor_positions()
                 
-                # Show current PnL on every check
-                try:
-                    positions = self.apex_client.get_positions()
-                    if positions:
-                        total_pnl = self.position_manager.calculate_total_pnl(positions)
-                        elapsed = self.position_manager.get_time_elapsed()
-                        logger.info(f"💰 PnL: ${total_pnl:+.2f} | Time: {elapsed}/{self.config['TIME_LIMIT_MINUTES']}min | Target: TP=${self.config['TAKE_PROFIT_USD']:+.0f} SL=${self.config['STOP_LOSS_USD']:+.0f}")
-                    else:
-                        logger.warning("⚠️  No positions returned by get_positions()")
-                except Exception as e:
-                    logger.error(f"❌ Error getting PnL: {e}")
-                    import traceback
-                    logger.error(traceback.format_exc())
+                # Show current PnL only every 5 minutes (not every check)
+                current_time = time.time()
+                if current_time - last_pnl_display_time >= pnl_display_interval:
+                    try:
+                        positions = self.apex_client.get_positions()
+                        if positions:
+                            total_pnl = self.position_manager.calculate_total_pnl(positions)
+                            elapsed = self.position_manager.get_time_elapsed()
+                            logger.info(f"💰 PnL: ${total_pnl:+.2f} | Time: {elapsed}/{self.config['TIME_LIMIT_MINUTES']}min | Target: TP=${self.config['TAKE_PROFIT_USD']:+.0f} SL=${self.config['STOP_LOSS_USD']:+.0f}")
+                            last_pnl_display_time = current_time
+                        else:
+                            logger.warning("⚠️  No positions returned by get_positions()")
+                    except Exception as e:
+                        logger.error(f"❌ Error getting PnL: {e}")
+                        import traceback
+                        logger.error(traceback.format_exc())
                 
                 if should_close and reason != "MONITOR_ERROR":
                     # Check if manual close - CRASH THE BOT
@@ -491,14 +500,13 @@ class TradingBot:
                     
                     return True
                 
-                # Print status every 5 minutes
-                current_time = time.time()
+                # Print detailed status every 5 minutes
                 if current_time - last_status_time >= status_interval:
                     self.print_status()
                     last_status_time = current_time
                 
-                # Sleep before next check (30 seconds)
-                time.sleep(30)
+                # Sleep before next check (15 seconds for faster SL/TP detection)
+                time.sleep(15)
                 
             except KeyboardInterrupt:
                 logger.warning("⚠️  Keyboard interrupt received")
@@ -506,7 +514,7 @@ class TradingBot:
             
             except Exception as e:
                 logger.error(f"❌ Error in monitoring loop: {e}")
-                time.sleep(30)
+                time.sleep(15)
         
         return False
     
