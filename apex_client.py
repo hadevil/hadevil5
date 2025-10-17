@@ -341,6 +341,23 @@ class ApexClient:
             logger.error(f"❌ Failed to calculate PnL: {e}")
             return 0.0
     
+    def get_order_status(self, order_id: str) -> Dict:
+        """
+        Get order status by ID
+        
+        Args:
+            order_id: Order ID to check
+            
+        Returns:
+            Order details
+        """
+        try:
+            order = self.private_client.get_order_by_id_v3(id=order_id)
+            return order
+        except Exception as e:
+            logger.error(f"❌ Failed to get order status: {e}")
+            return {}
+    
     def get_worst_price(self, symbol: str, side: str, size: str) -> str:
         """
         Get worst price from orderbook for market order
@@ -449,16 +466,24 @@ class ApexClient:
             )
             
             # Check order status
-            order_id = order.get('data', {}).get('id', 'N/A')
-            order_status = order.get('data', {}).get('status', 'UNKNOWN')
+            order_data = order.get('data', {})
+            order_id = order_data.get('id', 'N/A')
+            order_status = order_data.get('status', 'UNKNOWN')
             
             logger.info(f"✅ Order created: ID={order_id}, Status={order_status}")
             
+            # Log full order response for debugging
+            logger.debug(f"   Order response: {order_data}")
+            
             # Warn if order might not be filled
-            if order_status in ['PENDING', 'UNTRIGGERED']:
+            if order_status in ['PENDING', 'UNTRIGGERED', 'OPEN']:
                 logger.warning(f"⚠️  Order {order_id} is {order_status}, may not fill immediately")
+                logger.warning(f"   The position may show as size=0 until order is filled")
             elif order_status == 'FILLED':
                 logger.info(f"🎯 Order {order_id} FILLED successfully")
+            elif order_status == 'UNKNOWN':
+                logger.warning(f"⚠️  Order status is UNKNOWN - check order manually")
+                logger.warning(f"   Order data: {order_data}")
             
             return order
             
