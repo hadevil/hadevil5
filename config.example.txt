@@ -1,0 +1,55 @@
+# ========================================
+# APEX OMNI TRADING BOT - CONFIGURATION
+# ========================================
+# Copy this file to config.txt and fill in your values
+
+# ==========================================
+# API CREDENTIALS (From Apex Omni)
+# ==========================================
+# Get these from: https://omni.apex.exchange/keyManagement
+API_KEY=your_api_key_here
+API_SECRET=your_api_secret_here
+API_PASSPHRASE=your_passphrase_here
+ZK_SEEDS=0x...your_zk_seeds_here...
+ZK_L2KEY=
+ACCOUNT_ID=your_account_id_here
+
+# ==========================================
+# TRADING PARAMETERS (EDIT THESE VALUES)
+# ==========================================
+
+# Position size in USD (e.g., 1000 = $1,000 per position)
+POSITION_SIZE_USD=1000
+
+# Stop Loss in USD (negative value, e.g., -100 = lose $100 total)
+STOP_LOSS_USD=-100
+
+# Take Profit in USD (positive value, e.g., 200 = gain $200 total)
+TAKE_PROFIT_USD=200
+
+# Maximum time in minutes before closing all positions
+TIME_LIMIT_MINUTES=60
+
+# Leverage (fixed at 20x)
+LEVERAGE=20
+
+# Delay in minutes before reopening positions after close
+REENTRY_DELAY_MINUTES=8
+
+# ==========================================
+# ASSETS TO TRADE
+# ==========================================
+
+# Long positions (comma-separated, no spaces)
+# Examples: BTC,ETH,SOL,AVAX,MATIC,LINK,UNI,AAVE,ADA,DOT
+LONG_SYMBOLS=BTC,ETH
+
+# Short positions (comma-separated, no spaces)
+# Examples: SOL,MATIC,DOGE,AVAX,LINK
+SHORT_SYMBOLS=SOL
+
+# ==========================================
+# ADVANCED SETTINGS (DO NOT CHANGE)
+# ==========================================
+NETWORK_ID=9
+ENDPOINT=https://omni.apex.exchange
