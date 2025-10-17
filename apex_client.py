@@ -176,7 +176,9 @@ class ApexClient:
         try:
             # Get current price
             ticker = self.public_client.ticker_v3(symbol=symbol)
-            current_price = float(ticker['data']['close'])
+            # API returns data as list, get first element
+            ticker_data = ticker['data'][0] if isinstance(ticker['data'], list) else ticker['data']
+            current_price = float(ticker_data.get('lastPrice') or ticker_data.get('close'))
             
             # Calculate size: (USD amount) / price
             # With leverage, we can control more with less
