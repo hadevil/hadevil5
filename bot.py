@@ -562,18 +562,44 @@ class TradingBot:
         finally:
             self.stop()
     
-    def stop(self):
-        """Stop the bot gracefully"""
+    def stop(self, close_positions=True):
+        """
+        Stop the bot gracefully
+        
+        Args:
+            close_positions: If True, closes all open positions before stopping
+        """
         logger.info("🛑 Stopping bot...")
         self.is_running = False
         
-        # Try to close any open positions
-        try:
-            positions = self.apex_client.get_positions()
-            if positions:
-                logger.info("🔒 Closing open positions...")
-                self.close_all_positions(reason="SHUTDOWN")
-        except Exception as e:
-            logger.error(f"❌ Error closing positions during shutdown: {e}")
+        if close_positions:
+            # Try to close any open positions
+            try:
+                positions = self.apex_client.get_positions()
+                if positions:
+                    logger.warning("")
+                    logger.warning("="*80)
+                    logger.warning("🔒 EMERGENCY SHUTDOWN - CLOSING ALL POSITIONS")
+                    logger.warning("="*80)
+                    logger.warning(f"   {len(positions)} position(s) will be closed immediately")
+                    logger.warning("")
+                    
+                    for pos in positions:
+                        logger.warning(f"   Closing: {pos['symbol']} {pos['side']}")
+                    
+                    if self.close_all_positions(reason="EMERGENCY_SHUTDOWN"):
+                        logger.info("")
+                        logger.info("✅ All positions closed successfully")
+                        logger.info("")
+                    else:
+                        logger.error("")
+                        logger.error("❌ Some positions failed to close!")
+                        logger.error("   Please check your exchange manually!")
+                        logger.error("")
+                else:
+                    logger.info("   No open positions to close")
+            except Exception as e:
+                logger.error(f"❌ Error closing positions during shutdown: {e}")
+                logger.error("   Please check your exchange manually!")
         
         logger.info("✅ Bot stopped")
