@@ -534,11 +534,3 @@ class TradingBot:
             logger.error(f"❌ Error closing positions during shutdown: {e}")
         
         logger.info("✅ Bot stopped")
-ns = self.apex_client.get_positions()
-            if positions:
-                logger.info("🔒 Closing open positions...")
-                self.close_all_positions(reason="SHUTDOWN")
-        except Exception as e:
-            logger.error(f"❌ Error closing positions during shutdown: {e}")
-        
-        logger.info("✅ Bot stopped")
