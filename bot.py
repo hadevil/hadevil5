@@ -355,6 +355,16 @@ class TradingBot:
                 # Check exit conditions
                 should_close, reason = self.monitor_positions()
                 
+                # Show current PnL on every check
+                try:
+                    positions = self.apex_client.get_positions()
+                    if positions:
+                        total_pnl = self.position_manager.calculate_total_pnl(positions)
+                        elapsed = self.position_manager.get_time_elapsed()
+                        logger.info(f"💰 PnL: ${total_pnl:+.2f} | Time: {elapsed}/{self.config['TIME_LIMIT_MINUTES']}min | Target: TP=${self.config['TAKE_PROFIT_USD']:+.0f} SL=${self.config['STOP_LOSS_USD']:+.0f}")
+                except Exception as e:
+                    logger.debug(f"Could not get PnL: {e}")
+                
                 if should_close and reason != "MONITOR_ERROR":
                     # Get final positions for PnL
                     positions = self.apex_client.get_positions()
