@@ -1,6 +1,10 @@
 """
 Apex Omni API Client Wrapper
 Handles all API interactions with Apex Omni exchange
+
+Based on official Apex documentation:
+https://api-docs.omni.apex.exchange/
+https://github.com/ApeX-Protocol/apexpro-openapi
 """
 
 import time
@@ -174,15 +178,19 @@ class ApexClient:
             Tuple of (size, price)
         """
         try:
-            # Get current price
+            # Get current price from ticker
+            # ticker_v3 automatically removes hyphen from symbol
             ticker = self.public_client.ticker_v3(symbol=symbol)
-            # API returns data as list, get first element
-            ticker_data = ticker['data'][0] if isinstance(ticker['data'], list) else ticker['data']
-            current_price = float(ticker_data.get('lastPrice') or ticker_data.get('close'))
+            
+            # Response format: {"data": [{"symbol": "BTCUSDT", "lastPrice": "67500.00", ...}]}
+            ticker_data = ticker['data']
+            if isinstance(ticker_data, list):
+                ticker_data = ticker_data[0]
+            
+            # Get lastPrice from ticker
+            current_price = float(ticker_data['lastPrice'])
             
             # Calculate size: (USD amount) / price
-            # With leverage, we can control more with less
-            # But position size is still: notional_value / price
             raw_size = usd_amount / current_price
             
             # Round to step size
