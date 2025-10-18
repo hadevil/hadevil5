@@ -233,16 +233,23 @@ class TradingBot:
             position_size_usd = float(self.config['POSITION_SIZE_USD'])
             leverage = int(self.config['LEVERAGE'])
             
-            # Calculate total required balance
+            # Calculate total required balance (MARGIN, not position size!)
             total_assets = len(self.symbols_long) + len(self.symbols_short)
-            total_required = position_size_usd * total_assets
+            total_position_value = position_size_usd * total_assets
+            total_margin_required = total_position_value / leverage  # ← ALAVANCAGEM APLICADA!
             
             # Validate balance
             logger.info(f"💰 Validating balance for {total_assets} positions...")
-            if not self.apex_client.validate_balance(total_required):
+            logger.info(f"   Position value: ${total_position_value:,.2f}")
+            logger.info(f"   Margin required (÷{leverage}): ${total_margin_required:,.2f}")
+            
+            if not self.apex_client.validate_balance(total_margin_required):
                 logger.error(f"❌ Insufficient balance for opening positions")
+                logger.error(f"   Required margin: ${total_margin_required:,.2f}")
                 audit_logger.log_action('balance_validation_failed', {
-                    'required': total_required,
+                    'required_margin': total_margin_required,
+                    'position_value': total_position_value,
+                    'leverage': leverage,
                     'positions': total_assets
                 })
                 return False
