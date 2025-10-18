@@ -76,8 +76,16 @@ def main():
         # Load configuration
         import logging
         logger = logging.getLogger(__name__)
-        logger.info("📁 Loading configuration...")
-        config = load_config("config.txt")
+        
+        # Support custom config file via command line
+        config_file = "config.txt"
+        if len(sys.argv) > 1:
+            config_file = sys.argv[1]
+            logger.info(f"📁 Using custom config: {config_file}")
+        else:
+            logger.info("📁 Loading configuration...")
+        
+        config = load_config(config_file)
         print_config_summary(config)
         
         # Create bot instance
