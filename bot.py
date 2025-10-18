@@ -406,33 +406,10 @@ class TradingBot:
             logger.error("❌ Failed to open positions, aborting cycle")
             return False
         
-        # Wait for orders to fill and verify positions
-        logger.info("⏳ Waiting for orders to fill...")
-        time.sleep(5)
-        
-        # Verify positions were actually opened
-        positions = self.apex_client.get_positions()
-        if not positions:
-            logger.error("❌ CRITICAL: Orders created but NO POSITIONS found!")
-            logger.error("   This means orders were NOT FILLED by the exchange")
-            logger.error("   Possible causes:")
-            logger.error("   1. Market orders rejected due to slippage")
-            logger.error("   2. Insufficient liquidity")
-            logger.error("   3. Orders still pending (very slow fill)")
-            logger.error("")
-            logger.error("   Waiting 10 more seconds for delayed fill...")
-            time.sleep(10)
-            
-            # Check again
-            positions = self.apex_client.get_positions()
-            if not positions:
-                logger.error("❌ Still no positions after 15 seconds!")
-                logger.error("   Aborting cycle - orders failed to fill")
-                return False
-            else:
-                logger.info(f"✅ Positions finally appeared: {len(positions)} active")
-        else:
-            logger.info(f"✅ Verified {len(positions)} positions are open")
+        # Orders sent - proceed directly to monitoring
+        logger.info("✅ Orders sent to exchange")
+        logger.info("⏩ Proceeding to monitoring phase...")
+        logger.info("")
         
         # Monitor loop
         logger.info("👀 Starting monitoring loop...")
