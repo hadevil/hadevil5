@@ -49,10 +49,10 @@ class ApexClient:
     def _init_clients(self):
         """Initialize HTTP clients for public and private endpoints"""
         try:
-            # Public client (no auth needed)
-            self.public_client = HttpPublic(self.endpoint)
+            # Public client (no auth needed) - with increased timeout
+            self.public_client = HttpPublic(self.endpoint, timeout=30)
             
-            # Private client with signing (for orders and positions)
+            # Private client with signing (for orders and positions) - with increased timeout
             self.private_client = HttpPrivateSign(
                 self.endpoint,
                 network_id=self.network_id,
@@ -62,7 +62,8 @@ class ApexClient:
                     'key': self.config['API_KEY'],
                     'secret': self.config['API_SECRET'],
                     'passphrase': self.config['API_PASSPHRASE']
-                }
+                },
+                timeout=30
             )
             
             logger.info("✅ Apex clients initialized successfully")
