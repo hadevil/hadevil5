@@ -1,0 +1,27 @@
+# Scalping Bot Dependencies
+# Python 3.10+
+
+# Data manipulation
+pandas>=2.0.0
+numpy>=1.24.0
+
+# YAML config
+pyyaml>=6.0
+
+# ApeX Protocol SDK
+apexpro>=1.0.0
+
+# Web requests
+requests>=2.31.0
+
+# WebSockets (for live data if needed)
+websockets>=15.0,<16.0
+
+# StarkNet (required by apexpro)
+starknet-py>=0.27.0
+
+# Cryptography (required by apexpro)
+cryptography>=41.0.0
+
+# Utilities
+python-dateutil>=2.8.2
