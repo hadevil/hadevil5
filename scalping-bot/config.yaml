@@ -1,12 +1,13 @@
 # Scalping Bot Configuration
-# Default parameters from backtest
+# Otimizado para scalping com múltiplas estratégias
 
 general:
   # Trading settings
   symbol: "BTCUSDT"           # Symbol to trade (will be normalized to BTC-USDT)
-  strategy: "C2"              # Strategy to use: C1, C2, or C4
+  active_strategies: ["C2"]   # Strategies to use: ["C1"], ["C2"], ["C4"], or ["C1", "C2", "C4"]
   timeframe: "15m"            # Candle timeframe: 15m or 1h
-  order_value_usd: 1000       # Order size in USD
+  order_value_usd: 1000       # Order size in USD per strategy
+  max_positions: 3            # Max positions (1 per strategy)
   
   # Direction
   use_long: true              # Enable long signals
@@ -19,6 +20,24 @@ general:
   # Fees and slippage
   fee_taker: 0.0005           # Taker fee (0.05%)
   slippage: 0.0               # Slippage (0 for paper, 0.0001 for live)
+  
+  # 🆕 SCALPING FEATURES
+  # Trailing Stop
+  trailing_stop:
+    enabled: false            # Enable trailing stop
+    activation_atr_mult: 0.3  # Activate when profit >= 0.3× ATR
+    trail_distance_atr: 0.2   # Trail distance: 0.2× ATR from price
+  
+  # Time-based Exit
+  time_based_exit:
+    enabled: false            # Force close position after max duration
+    max_duration_minutes: 30  # Max position duration (minutes)
+  
+  # Volatility Filter
+  volatility_filter:
+    enabled: false            # Only trade when ATR above threshold
+    min_atr_usd: 30           # Minimum ATR in USD
+    timeframe: "1h"           # Check ATR on this timeframe
   
   # Paths
   csv_folder: "./data"                        # Folder with CSV files for backtesting
