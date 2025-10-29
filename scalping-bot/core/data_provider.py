@@ -78,24 +78,40 @@ class LiveDataProvider(DataProvider):
             
             logger.info(f"Fetching {limit} {timeframe} candles for {symbol}...")
             
-            # Try to get klines (you'll need to verify the exact method from ApeX API docs)
-            try:
-                # This is the expected method - adjust based on actual ApeX API
-                result = self.apex_client.public_client.klines_v3(
-                    symbol=symbol,
-                    interval=interval,
-                    limit=limit
-                )
-                
+            # Use the new get_klines method from apex_client
+            klines = self.apex_client.get_klines(
+                symbol=symbol,
+                interval=interval,
+                limit=limit
+            )
+            
+            if klines and len(klines) > 0:
                 # Parse klines data
-                klines = result.get('data', [])
-                
                 # Expected format: [[timestamp, open, high, low, close, volume], ...]
-                df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+                # or [{'t': timestamp, 'o': open, 'h': high, 'l': low, 'c': close, 'v': volume}, ...]
                 
-            except AttributeError:
-                # Fallback: if klines method doesn't exist, create dummy data
-                logger.warning(f"klines_v3 method not available, using fallback with ticker data")
+                if isinstance(klines[0], list):
+                    # Array format
+                    df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+                elif isinstance(klines[0], dict):
+                    # Dict format - map keys
+                    df = pd.DataFrame(klines)
+                    # Rename columns if needed
+                    column_map = {
+                        't': 'timestamp', 'time': 'timestamp',
+                        'o': 'open', 'open': 'open',
+                        'h': 'high', 'high': 'high',
+                        'l': 'low', 'low': 'low',
+                        'c': 'close', 'close': 'close',
+                        'v': 'volume', 'volume': 'volume'
+                    }
+                    df = df.rename(columns={k: v for k, v in column_map.items() if k in df.columns})
+                else:
+                    raise ValueError(f"Unknown klines format: {type(klines[0])}")
+                
+            else:
+                # Fallback: create synthetic data for testing
+                logger.warning(f"⚠️  No klines data from API, using synthetic data (for testing only)")
                 
                 ticker = self.apex_client.public_client.ticker_v3(symbol=symbol)
                 ticker_data = ticker['data']

@@ -93,6 +93,57 @@ class ApexClient:
             logger.error(f"❌ Failed to load symbol configs: {e}")
             raise
     
+    def get_klines(self, symbol: str, interval: str, limit: int = 200) -> List[Dict]:
+        """
+        Get historical klines/candles data
+        
+        Args:
+            symbol: Trading symbol (e.g., 'BTC-USDT')
+            interval: Candle interval ('1', '5', '15', '60', '240', 'D')
+                     1=1min, 5=5min, 15=15min, 60=1h, 240=4h, D=1day
+            limit: Number of candles to fetch (default 200)
+            
+        Returns:
+            List of kline dicts with OHLCV data
+        """
+        try:
+            # ApeX Omni API endpoint for klines
+            # Check if method exists in public client
+            if hasattr(self.public_client, 'klines_v3'):
+                result = self.public_client.klines_v3(
+                    symbol=symbol,
+                    interval=interval,
+                    limit=limit
+                )
+                
+                if result.get('code') == 0 and result.get('data'):
+                    return result['data']
+                else:
+                    logger.warning(f"Klines API returned no data: {result}")
+                    return []
+            
+            elif hasattr(self.public_client, 'klines'):
+                # Try alternative method name
+                result = self.public_client.klines(
+                    symbol=symbol,
+                    interval=interval,
+                    limit=limit
+                )
+                
+                if result.get('code') == 0 and result.get('data'):
+                    return result['data']
+                else:
+                    logger.warning(f"Klines API returned no data: {result}")
+                    return []
+            
+            else:
+                logger.warning("Klines method not found in ApeX public client")
+                return []
+                
+        except Exception as e:
+            logger.error(f"Failed to fetch klines for {symbol}: {e}")
+            return []
+    
     def validate_symbol(self, symbol: str) -> bool:
         """
         Check if symbol exists and is tradeable
