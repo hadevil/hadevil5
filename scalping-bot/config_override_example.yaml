@@ -1,0 +1,61 @@
+# Example: Override configuration
+# This shows how to customize strategy parameters
+
+general:
+  symbol: "ETHUSDT"
+  strategy: "C2"
+  timeframe: "1h"              # Changed to 1 hour
+  order_value_usd: 1500        # Larger position
+  
+  use_long: true
+  use_short: false             # Only long signals
+  
+  mode: "paper"
+  data_source: "csv"
+  
+  fee_taker: 0.0005
+  slippage: 0.0001             # Add some slippage simulation
+  
+  csv_folder: "./data"
+  state_file: "./state/position_state.json"
+  trade_log: "./logs/trades.csv"
+
+apex:
+  api_key: "YOUR_API_KEY"
+  api_secret: "YOUR_SECRET"
+  api_passphrase: "YOUR_PASSPHRASE"
+  zk_seeds: "YOUR_ZK_SEEDS"
+
+strategies:
+  C1:
+    active: true
+    ema_fast: 20
+    ema_slow: 50
+    rsi_min: 40
+    rsi_max: 65
+    tp_atr_mult: 1.8
+    sl_atr_mult: 0.8
+    filter_volume: true
+    volume_ma_mult: 1.2
+    range_lookback: 12
+    
+  C2:
+    active: true
+    ema_fast: 9
+    ema_slow: 21
+    rsi_min: 40               # Wider RSI range
+    rsi_max: 65               # Wider RSI range
+    tp_atr_mult: 1.6          # Higher TP target
+    sl_atr_mult: 0.6
+    filter_atr: true
+    anchor_vol_mult: 1.5
+    
+  C4:
+    active: true
+    ema_fast: 13
+    ema_slow: 34
+    rsi_min: 45
+    rsi_max: 60
+    tp_atr_mult: 1.2          # Higher TP
+    sl_atr_mult: 0.5
+    filter_pullback: false    # Disable pullback filter

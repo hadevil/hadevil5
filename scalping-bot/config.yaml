@@ -1,0 +1,104 @@
+# Scalping Bot Configuration
+# Otimizado para scalping com múltiplas estratégias
+
+general:
+  # Trading settings
+  symbol: "BTCUSDT"           # Symbol to trade (will be normalized to BTC-USDT)
+  active_strategies: ["C2"]   # Strategies to use: ["C1"], ["C2"], ["C4"], or ["C1", "C2", "C4"]
+  timeframe: "15m"            # Candle timeframe: 15m or 1h
+  order_value_usd: 1000       # Order size in USD per strategy
+  max_positions: 3            # Max positions (1 per strategy)
+  
+  # Direction
+  use_long: true              # Enable long signals
+  use_short: true             # Enable short signals
+  
+  # Execution mode
+  mode: "paper"               # Trading mode: "paper" (simulated) or "live" (real)
+  data_source: "csv"          # Data source: "csv" (local files) or "live" (exchange API)
+  
+  # Fees and slippage
+  fee_taker: 0.0005           # Taker fee (0.05%)
+  slippage: 0.0               # Slippage (0 for paper, 0.0001 for live)
+  
+  # 🆕 SCALPING FEATURES
+  # Trailing Stop
+  trailing_stop:
+    enabled: false            # Enable trailing stop
+    activation_atr_mult: 0.3  # Activate when profit >= 0.3× ATR
+    trail_distance_atr: 0.2   # Trail distance: 0.2× ATR from price
+  
+  # Time-based Exit
+  time_based_exit:
+    enabled: false            # Force close position after max duration
+    max_duration_minutes: 30  # Max position duration (minutes)
+  
+  # Volatility Filter
+  volatility_filter:
+    enabled: false            # Only trade when ATR above threshold
+    min_atr_usd: 30           # Minimum ATR in USD
+    timeframe: "1h"           # Check ATR on this timeframe
+  
+  # Paths
+  csv_folder: "./data"                        # Folder with CSV files for backtesting
+  state_file: "./state/position_state.json"   # Position state file
+  trade_log: "./logs/trades.csv"              # Trade log file
+
+# ApeX configuration (required for live mode or live data)
+# IMPORTANT: Add your credentials here or use environment variables
+apex:
+  api_key: ""                 # Your ApeX API key
+  api_secret: ""              # Your ApeX secret
+  api_passphrase: ""          # Your ApeX passphrase
+  zk_seeds: ""                # Your ZK seeds
+  # Optional: zk_l2Key if needed
+
+# Strategy configurations
+# These are default parameters from backtest
+# You can override per strategy
+
+strategies:
+  C1:
+    active: true
+    # EMAs
+    ema_fast: 20
+    ema_slow: 50
+    # RSI range
+    rsi_min: 40
+    rsi_max: 65
+    # TP/SL as ATR multiples
+    tp_atr_mult: 1.8
+    sl_atr_mult: 0.8
+    # Filters
+    filter_volume: true         # Enable volume filter
+    volume_ma_mult: 1.2         # Volume must be > 1.2x MA
+    range_lookback: 12          # Lookback period for range calculation
+    
+  C2:
+    active: true
+    # EMAs
+    ema_fast: 9
+    ema_slow: 21
+    # RSI range
+    rsi_min: 45
+    rsi_max: 60
+    # TP/SL as ATR multiples
+    tp_atr_mult: 1.4
+    sl_atr_mult: 0.6
+    # Filters
+    filter_atr: true            # Enable ATR filter
+    anchor_vol_mult: 1.5        # Anchor candle volume > 1.5x MA
+    
+  C4:
+    active: true
+    # EMAs
+    ema_fast: 13
+    ema_slow: 34
+    # RSI range
+    rsi_min: 47
+    rsi_max: 57
+    # TP/SL as ATR multiples
+    tp_atr_mult: 1.0
+    sl_atr_mult: 0.5
+    # Filters
+    filter_pullback: true       # Enable pullback filter
